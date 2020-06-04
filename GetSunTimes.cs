@@ -35,8 +35,6 @@ namespace uk.me.timallen.infohub
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             IRestResponse response = client.Execute(request);
-            Console.WriteLine(response.Content);
-
             dynamic sunTimes = JsonConvert.DeserializeObject(response.Content);
 
             return new OkObjectResult(
