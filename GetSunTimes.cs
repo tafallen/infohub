@@ -8,14 +8,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
-using Newtonsoft.Json;
 
 namespace uk.me.timallen.infohub
 {
     public static class GetSunTimes
     {
-        public static string _serviceUrl = "https://api.sunrise-sunset.org/json";
-
         [FunctionName("GetSunTimes")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
@@ -33,20 +30,31 @@ namespace uk.me.timallen.infohub
 
             log.LogInformation("lat: " + lat + " lng:" + lng);
 
-            var client = new RestClient(_serviceUrl + "?lat=" + lat + "&lng=" + lng);
+            var json = GetFromSunriseSunset(lat, lng);
+
+            log.LogInformation(json);
+            return new OkObjectResult(json);
+        }
+
+        private static string GetFromSunriseSunset(string lat, string lng)
+        {
+            var serviceUrl = Environment.GetEnvironmentVariable("sunrisesunsetapi");
+            var client = new RestClient(serviceUrl + "?lat=" + lat + "&lng=" + lng);
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
-            var response = client.Execute(request);
+
+            return FormatResponse(client.Execute(request));
+        }
+
+        private static string FormatResponse(IRestResponse response)
+        {
             dynamic sunTimes = JsonConvert.DeserializeObject(response.Content);
 
-            var json = "{\"sunrise\":\"" + 
+            return "{\"sunrise\":\"" + 
                 (string)sunTimes["results"]["sunrise"] + 
                 "\", \"sunset\":\"" + 
                 (string)sunTimes["results"]["sunset"] + 
                 "\"}";
-
-            log.LogInformation(json);
-            return new OkObjectResult(json);
         }
     }
 }
