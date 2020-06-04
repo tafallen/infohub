@@ -14,6 +14,8 @@ namespace uk.me.timallen.infohub
 {
     public static class GetSunTimes
     {
+        public static string _serviceUrl = "https://api.sunrise-sunset.org/json";
+
         [FunctionName("GetSunTimes")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
@@ -31,18 +33,20 @@ namespace uk.me.timallen.infohub
 
             log.LogInformation("lat: " + lat + " lng:" + lng);
 
-            var client = new RestClient("https://api.sunrise-sunset.org/json?lat=" + lat + "&lng=" + lng);
+            var client = new RestClient(_serviceUrl + "?lat=" + lat + "&lng=" + lng);
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
-            IRestResponse response = client.Execute(request);
+            var response = client.Execute(request);
             dynamic sunTimes = JsonConvert.DeserializeObject(response.Content);
 
-            return new OkObjectResult(
-                "{\"sunrise\":\"" + 
-                sunTimes["results"]["sunrise"] + 
+            var json = "{\"sunrise\":\"" + 
+                (string)sunTimes["results"]["sunrise"] + 
                 "\", \"sunset\":\"" + 
-                sunTimes["results"]["sunset"] + 
-                "\"}");
+                (string)sunTimes["results"]["sunset"] + 
+                "\"}";
+
+            log.LogInformation(json);
+            return new OkObjectResult(json);
         }
     }
 }
