@@ -30,16 +30,17 @@ namespace uk.me.timallen.infohub
 
             log.LogInformation("lat: " + lat + " lng:" + lng);
 
-            var json = GetFromSunriseSunset(lat, lng);
+            var json = GetFromSunriseSunset(lat, lng, log);
 
             log.LogInformation(json);
             return new OkObjectResult(json);
         }
 
-        private static string GetFromSunriseSunset(string lat, string lng)
+        private static string GetFromSunriseSunset(string lat, string lng, ILogger log)
         {
-            var serviceUrl = Environment.GetEnvironmentVariable("sunrisesunsetapi");
-            var client = new RestClient(serviceUrl + "?lat=" + lat + "&lng=" + lng);
+            var serviceUrl = Environment.GetEnvironmentVariable("sunrisesunsetapi") + "?lat=" + lat + "&lng=" + lng;
+            log.LogInformation(serviceUrl);
+            var client = new RestClient(serviceUrl);
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
 
