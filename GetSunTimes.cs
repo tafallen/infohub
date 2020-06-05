@@ -38,7 +38,7 @@ namespace uk.me.timallen.infohub
 
         private static string GetFromSunriseSunset(string lat, string lng, ILogger log)
         {
-            var serviceUrl = Environment.GetEnvironmentVariable("sunrisesunsetapi") + "?lat=" + lat + "&lng=" + lng;
+            var serviceUrl ="https://api.sunrise-sunset.org/json" + "?lat=" + lat + "&lng=" + lng;
             log.LogInformation(serviceUrl);
             var client = new RestClient(serviceUrl);
             client.Timeout = -1;
