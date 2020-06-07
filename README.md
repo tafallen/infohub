@@ -52,7 +52,7 @@ In the Application Settings area of the Azure Functions where you're deploying t
 #### Usage
 
 Provide the Query Param _location__ with the location key and you'd call it like this from within Postman or from your code:
-```https://<<your service URI>>/api/GetWeather??location=<<Your Location Key>>```
+```https://<<your service URI>>/api/GetWeather?location=<<Your Location Key>>```
 
 Returned is a JSON object containing a basic 5 day weather forecast, maximum and minimum temperatures and a summary forecast.
 
@@ -61,12 +61,29 @@ Returned is a JSON object containing a basic 5 day weather forecast, maximum and
 
 ### GetNews
 
+Gets the latest top ten news headlines from the BBC via the NewsAPI service (newsapi.org).
+
+#### Configuration
+Once again, this requires an API key which can be obtained from NewsAPI. The service is currently hardcoded to select the top 10 headlines from the BBC but in later updates I will add functionality to get news about specific, and from other sources.
+
+##### Local config
+
+In your local.settings.json file add this in the values section:
+```"news_key" : "<<PUT YOUR API KEY HERE>>"```
+
+##### Server side setup
+
+In the Application Settings area of the Azure Functions where you're deploying this you'll need to add a new setting with the name _news_key_ and the api key.
+
+
 #### Usage
 
-[TODO: Add example]
+Just call the service endpoint and look at the JSON returned.
+```https://<<your service URI>>/api/GetNews```
 
 #### To Do
-
+[Add details of the JSON returned]
+[Add the ability to customise the news feed]
 
 ### GetHeating
 
