@@ -1,12 +1,14 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using NewsAPI;
+using NewsAPI.Models;
+using NewsAPI.Constants;
+using System.Collections.Generic;
 
 namespace uk.me.timallen.infohub
 {
@@ -17,19 +19,43 @@ namespace uk.me.timallen.infohub
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            var articles = GetArticles();
+            string result = FormatResponse(articles);
+            return new OkObjectResult(result.Substring(0, result.Length-1));
+        }
 
-            string name = req.Query["name"];
+        public static string FormatResponse(IList<Article> articles)
+        {
+            string result = string.Empty;
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
+            foreach (var article in articles)
+            {
+                result += $"{{\"title\":\"{article.Title}\",";
+                result += $"\"author\":\"{article.Author}\",";
+                result += $"\"description\":\"{article.Description}\",";
+                result += $"\"publicationDate\":\"{article.PublishedAt}\"}},";
+            }
+            return result;
+        }
 
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
+        public static IList<Article> GetArticles()
+        {
+            var newsKey = Environment.GetEnvironmentVariable("news_key");
+            var newsApiClient = new NewsApiClient(newsKey);
+            var sources = new List<string>(new []{"bbc-news"});
 
-            return new OkObjectResult(responseMessage);
+            var articlesResponse = newsApiClient.GetTopHeadlines( new TopHeadlinesRequest
+            {
+                Sources = sources,
+                Language = Languages.EN,
+                PageSize = 10
+            });
+
+            if (articlesResponse.Status == Statuses.Ok)
+            {   
+                return articlesResponse.Articles;
+            }
+            return new List<Article>();            
         }
     }
 }
