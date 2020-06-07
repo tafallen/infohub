@@ -26,7 +26,7 @@ namespace uk.me.timallen.infohub
 
         public static string FormatResponse(IList<Article> articles)
         {
-            string result = string.Empty;
+            string result = "[";
 
             foreach (var article in articles)
             {
@@ -35,6 +35,7 @@ namespace uk.me.timallen.infohub
                 result += $"\"description\":\"{article.Description}\",";
                 result += $"\"publicationDate\":\"{article.PublishedAt}\"}},";
             }
+            result += "]";
             return result;
         }
 
