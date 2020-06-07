@@ -75,7 +75,6 @@ In your local.settings.json file add this in the values section:
 
 In the Application Settings area of the Azure Functions where you're deploying this you'll need to add a new setting with the name _news_key_ and the api key.
 
-
 #### Usage
 
 Just call the service endpoint and look at the JSON returned.
@@ -104,3 +103,19 @@ Currently deployed via an Azure Pipeline to an Azure Functions deployment slot.
 [TODO: to write post deployment tests and, if passing, swap slots to take live.]
 
 [TODO: Azure Function IaC code]
+
+## Why?
+
+Well, I have an infoscren (see different github repo) and was looking to develop some more in different form factors. Rather than duplicating the Python code I wrote for that I thought that I should centralise them and then I can apply come centralised caching to reduce the load on the downstream services.
+
+## Why Azure Functions?
+
+I've not deployed an Azure Function for years so I thought that it might be nice to see what's new, plus it's got a fairly generous free tier. Also it allowed me to tie in an Azure DevOps Pipeline for deployment and, since I was studying for a DevOps certification, I thought it would be a good learning opportunity.
+
+## Why Github?
+
+Well, why not make the code available to everyone. I'm not looking to build a platform but if anyone can sugest improvements, or if this code can help someone else, then why not?
+
+## Where to next?
+
+Well, I'd like to recode these in Python and Node.js as they're both interesting languages to develop for.
