@@ -21,7 +21,7 @@ namespace uk.me.timallen.infohub
         {
             var articles = GetArticles();
             string result = FormatResponse(articles);
-            return new OkObjectResult(result.Substring(0, result.Length-1));
+            return new OkObjectResult(result);
         }
 
         public static string FormatResponse(IList<Article> articles)
@@ -35,6 +35,7 @@ namespace uk.me.timallen.infohub
                 result += $"\"description\":\"{article.Description.Replace('\"', '\'')}\",";
                 result += $"\"publicationDate\":\"{article.PublishedAt}\"}},";
             }
+            result = result.Substring(0, result.Length-1);
             result += "]";
             return result;
         }
