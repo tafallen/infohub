@@ -32,7 +32,7 @@ namespace uk.me.timallen.infohub
             {
                 result += $"{{\"title\":\"{article.Title}\",";
                 result += $"\"author\":\"{article.Author}\",";
-                result += $"\"description\":\"{article.Description}\",";
+                result += $"\"description\":\"{article.Description.Replace('\"', '\'')}\",";
                 result += $"\"publicationDate\":\"{article.PublishedAt}\"}},";
             }
             result += "]";
