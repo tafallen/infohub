@@ -33,6 +33,7 @@ namespace uk.me.timallen.infohub
         private static string GetFromAccuweather(string location)
         {
             var response = MakeRequest(location);
+            Console.WriteLine(response);
             dynamic weather = JsonConvert.DeserializeObject(response.Content);
             return FormatResponse(weather["DailyForecasts"]);
         }
