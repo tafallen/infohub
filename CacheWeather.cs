@@ -15,7 +15,7 @@ namespace uk.me.timallen.infohub
 
         [FunctionName("CacheWeather")]
         [return: Table("weather")]
-        public static Weather_Forecast Run([TimerTrigger("0 */6 * * * *")]TimerInfo myTimer, ILogger log)
+        public static Weather_Forecast Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
         {
             var lat = Environment.GetEnvironmentVariable("weatherlat");
             var lng = Environment.GetEnvironmentVariable("weatherlng");
@@ -23,6 +23,8 @@ namespace uk.me.timallen.infohub
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
             var forecast = OpenWeather.GetForecast(lat, lng);
+
+            log.LogInformation(forecast);
 
             return new Weather_Forecast 
             { 
