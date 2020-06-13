@@ -6,7 +6,7 @@ namespace uk.me.timallen.infohub
 {
     public static class CacheWeather
     {
-        public class Weather_Forecast
+        public class WeatherForecast
         {
             public string PartitionKey { get; set; }
             public string RowKey { get; set; }
@@ -15,7 +15,7 @@ namespace uk.me.timallen.infohub
 
         [FunctionName("CacheWeather")]
         [return: Table("weather")]
-        public static Weather_Forecast Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
+        public static WeatherForecast Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
         {
             var lat = Environment.GetEnvironmentVariable("weatherlat");
             var lng = Environment.GetEnvironmentVariable("weatherlng");
@@ -26,7 +26,7 @@ namespace uk.me.timallen.infohub
 
             log.LogInformation(forecast);
 
-            return new Weather_Forecast 
+            return new WeatherForecast 
             { 
                 PartitionKey = lat + "," + lng,
                 RowKey = Guid.NewGuid().ToString(), 
