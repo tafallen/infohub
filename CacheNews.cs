@@ -7,15 +7,17 @@ namespace uk.me.timallen.infohub
     public static class CacheNews
     {
         [FunctionName("CacheNews")]
-        // public static NewsArticles Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
-        public static NewsArticles Run([TimerTrigger("0 */6 * * * *")]TimerInfo myTimer, ILogger log)
+        [return: Table("news")]
+        public static NewsArticles Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
+        //public static NewsArticles Run([TimerTrigger("* * * * * *")]TimerInfo myTimer, ILogger log)
         {
-            return new NewsArticles
+            var result = new NewsArticles
             {
                 PartitionKey = "bbc-news",
                 RowKey = Guid.NewGuid().ToString(),
                 Articles = News.GetNews()
             };
+            return result;
         }
 
         public class NewsArticles
