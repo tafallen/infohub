@@ -2,8 +2,6 @@ using System;
 using NewsAPI;
 using NewsAPI.Models;
 using NewsAPI.Constants;
-using Newtonsoft.Json;
-using RestSharp;
 using System.Collections.Generic;
 
 namespace uk.me.timallen.infohub
