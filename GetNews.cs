@@ -14,6 +14,7 @@ namespace uk.me.timallen.infohub
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
+            // Need to get this from the cache not the API
             return new OkObjectResult(News.GetNews());
         }
     }
