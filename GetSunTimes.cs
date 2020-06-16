@@ -26,6 +26,9 @@ namespace uk.me.timallen.infohub
             lng = lng ?? data?.lng;
 
             var result = SunriseSunset.GetSunriseSunsetTimes(lat, lng);
+
+            log.LogInformation(result);
+
             return new OkObjectResult(result);
         }
     }

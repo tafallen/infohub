@@ -27,6 +27,8 @@ namespace uk.me.timallen.infohub
 
             var response = GetFromAccuweather(location);
 
+            log.LogInformation(response);
+
             return new OkObjectResult(response);
         }
 
@@ -45,7 +47,7 @@ namespace uk.me.timallen.infohub
             for(int i = 0; i < dailyForecasts.Count; i++)
             {
                 dynamic day = dailyForecasts[i];
-                var  x =  "{ \"day\": \"" + DateTime.Now.AddDays(i).DayOfWeek.ToString() + 
+                var  forecast =  "{ \"day\": \"" + DateTime.Now.AddDays(i).DayOfWeek.ToString() + 
                     "\", \"min\": \"" + day.Temperature.Minimum.Value + 
                     "\", \"max\": \"" + day.Temperature.Maximum.Value + 
                     "\", \"summary\":\"" + day.Day.IconPhrase + 
@@ -53,7 +55,7 @@ namespace uk.me.timallen.infohub
                     "\", \"nightIcon\": \"" + day.Night.Icon + 
                     "\"},";
 
-                result += x;
+                result += forecast;
             }
             result = result.Substring(0, result.Length-1);
             return $"[{result}]";
