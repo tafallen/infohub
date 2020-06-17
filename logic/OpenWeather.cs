@@ -45,8 +45,11 @@ namespace uk.me.timallen.infohub
                     "\", \"summary\":\"" + day.weather[0].main + 
                     "\", \"dayIcon\": \"" + day.weather[0].icon + 
                     "\", \"nightIcon\": \"" + day.weather[0].icon + 
+                    "\", \"wind_speed\": \"" + day.wind_speed + 
+                    "\", \"wind_deg\": \"" + day.wind_deg + 
+                    "\", \"sunrise\": \"" + day.sunrise + 
+                    "\", \"sunset\": \"" + day.sunset + 
                     "\"},";
-
                 result += forecast;
             }
             result = result.Substring(0, result.Length-1);
