@@ -96,21 +96,13 @@ Just call the service endpoint and look at the JSON returned.
 
 C# .net Core 3.1 Azure Functions developed using VS Code.
 
-## Deployment
-
-Currently deployed via an Azure Pipeline to an Azure Functions deployment slot.
-
-[TODO: to write post deployment tests and, if passing, swap slots to take live.]
-
-[TODO: Azure Function IaC code]
-
 ## Why?
 
 Well, I have an infoscren (see different github repo) and was looking to develop some more in different form factors. Rather than duplicating the Python code I wrote for that I thought that I should centralise them and then I can apply come centralised caching to reduce the load on the downstream services.
 
 ## Why Azure Functions?
 
-I've not deployed an Azure Function for years so I thought that it might be nice to see what's new, plus it's got a fairly generous free tier. Also it allowed me to tie in an Azure DevOps Pipeline for deployment and, since I was studying for a DevOps certification, I thought it would be a good learning opportunity.
+I've not deployed an Azure Function for years so I thought that it might be nice to see what's new, plus it's got a fairly generous free tier.
 
 ## Why Github?
 
