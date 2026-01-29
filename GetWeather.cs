@@ -42,23 +42,21 @@ namespace uk.me.timallen.infohub
 
         private static string FormatResponse(dynamic dailyForecasts)
         {
-            string result = string.Empty;
+            var forecasts = new System.Collections.Generic.List<object>();
 
             for(int i = 0; i < dailyForecasts.Count; i++)
             {
                 dynamic day = dailyForecasts[i];
-                var  forecast =  "{ \"day\": \"" + DateTime.Now.AddDays(i).DayOfWeek.ToString() + 
-                    "\", \"min\": \"" + day.Temperature.Minimum.Value + 
-                    "\", \"max\": \"" + day.Temperature.Maximum.Value + 
-                    "\", \"summary\":\"" + day.Day.IconPhrase + 
-                    "\", \"dayIcon\": \"" + day.Day.Icon + 
-                    "\", \"nightIcon\": \"" + day.Night.Icon + 
-                    "\"},";
-
-                result += forecast;
+                forecasts.Add(new {
+                    day = DateTime.Now.AddDays(i).DayOfWeek.ToString(),
+                    min = day.Temperature.Minimum.Value.ToString(),
+                    max = day.Temperature.Maximum.Value.ToString(),
+                    summary = day.Day.IconPhrase.ToString(),
+                    dayIcon = day.Day.Icon.ToString(),
+                    nightIcon = day.Night.Icon.ToString()
+                });
             }
-            result = result.Substring(0, result.Length-1);
-            return $"[{result}]";
+            return JsonConvert.SerializeObject(forecasts);
         }
 
         private static IRestResponse MakeRequest(string location)
