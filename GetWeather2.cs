@@ -32,15 +32,14 @@ namespace uk.me.timallen.infohub
             log.LogInformation("lat: " + lat + " lng:" + lng);
 
             // var table = GetStorageTable("weather");
-            // var result = GetMostRecentEntry( table, lat + "," + lng);
+            // var result = GetMostRecentEntry<Weather>(table, lat + "," + lng).Forecast;
             var result = OpenWeather.GetForecast(lat, lng);
             return new OkObjectResult(result);
         }
 
-// TODO: Use a generic here to reuse the code
-        public static string GetMostRecentEntry(CloudTable table, string partitionKey)
+        public static T GetMostRecentEntry<T>(CloudTable table, string partitionKey) where T : ITableEntity, new()
         {
-            var query = new TableQuery<Weather>()
+            var query = new TableQuery<T>()
                 .Where(
                     TableQuery.GenerateFilterCondition(
                         "PartitionKey", 
@@ -51,11 +50,7 @@ namespace uk.me.timallen.infohub
                 new TableContinuationToken()
                 ).Result.Results;
 
-            var orderedForecasts = from s in items
-                                    orderby s.Timestamp 
-                                    select s;
-
-            return orderedForecasts.First().Forecast;
+            return items.OrderByDescending(s => s.Timestamp).FirstOrDefault();
         }
 
         public static CloudTable GetStorageTable(string table)
