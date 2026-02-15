@@ -33,7 +33,7 @@ namespace uk.me.timallen.infohub
 
             // var table = GetStorageTable("weather");
             // var result = GetMostRecentEntry<Weather>(table, lat + "," + lng).Forecast;
-            var result = OpenWeather.GetForecast(lat, lng);
+            var result = await OpenWeather.GetForecastAsync(lat, lng);
             return new OkObjectResult(result);
         }
 

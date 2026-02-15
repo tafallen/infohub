@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 
@@ -15,14 +16,14 @@ namespace uk.me.timallen.infohub
 
         [FunctionName("CacheWeather")]
         [return: Table("weather")]
-        public static WeatherForecast Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
+        public static async Task<WeatherForecast> Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
         {
             var lat = Environment.GetEnvironmentVariable("weatherlat");
             var lng = Environment.GetEnvironmentVariable("weatherlng");
 
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            var forecast = OpenWeather.GetForecast(lat, lng);
+            var forecast = await OpenWeather.GetForecastAsync(lat, lng);
 
             log.LogInformation(forecast);
 
