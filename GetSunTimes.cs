@@ -25,7 +25,7 @@ namespace uk.me.timallen.infohub
             lat = lat ?? data?.lat;
             lng = lng ?? data?.lng;
 
-            var result = SunriseSunset.GetSunriseSunsetTimes(lat, lng);
+            var result = await SunriseSunset.GetSunriseSunsetTimesAsync(lat, lng);
 
             log.LogInformation(result);
 
