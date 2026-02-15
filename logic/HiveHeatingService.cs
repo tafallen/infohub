@@ -5,21 +5,18 @@ using RestSharp;
 
 namespace uk.me.timallen.infohub
 {
-    public class HiveHeating
+    public class HiveHeatingService : IHiveHeatingService
     {
-        public static async Task<ThermostatState> GetHeatingStateAsync()
+        private readonly IRestClientFactory _clientFactory;
+
+        public HiveHeatingService(IRestClientFactory clientFactory)
         {
-            var instance = new HiveHeating();
-            return await instance.GetThermostatStateAsync();
+            _clientFactory = clientFactory;
         }
 
-        public async Task<ThermostatState> GetThermostatStateAsync()
+        public async Task<ThermostatState> GetHeatingStateAsync()
         {
-            var client = new RestClient(GetHiveNodeThermostatUrl())
-            {
-                Timeout = -1
-            };
-
+            var client = _clientFactory.Create(GetHiveNodeThermostatUrl());
             var request = GetRequest(Method.GET);
             var sessionId = await GetSessionIdAsync();
             request.AddHeader("X-Omnia-Access-Token", sessionId);
@@ -31,10 +28,7 @@ namespace uk.me.timallen.infohub
 
         private async Task<string> GetSessionIdAsync()
         {
-            var client = new RestClient(GetHiveAuthUrl())
-            {
-                Timeout = -1
-            };
+            var client = _clientFactory.Create(GetHiveAuthUrl());
 
             var request = GetRequest(Method.POST);
             request.AddParameter("application/vnd.alertme.zoo-6.1+json", 
@@ -65,7 +59,7 @@ namespace uk.me.timallen.infohub
             return result;
         }
 
-        private RestRequest GetRequest(RestSharp.Method method)
+        private RestRequest GetRequest(Method method)
         {
             var request = new RestRequest(method);
             request.AddHeader("Content-Type", "application/vnd.alertme.zoo-6.1+json");

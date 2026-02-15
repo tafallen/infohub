@@ -1,12 +1,21 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
 namespace uk.me.timallen.infohub
 {
-    public static class CacheWeather
+    public class CacheWeather
     {
+        private readonly IOpenWeatherService _weatherService;
+        private readonly ILogger _logger;
+
+        public CacheWeather(IOpenWeatherService weatherService, ILoggerFactory loggerFactory)
+        {
+            _weatherService = weatherService;
+            _logger = loggerFactory.CreateLogger<CacheWeather>();
+        }
+
         public class WeatherForecast
         {
             public string PartitionKey { get; set; }
@@ -14,18 +23,18 @@ namespace uk.me.timallen.infohub
             public string Forecast { get; set; }
         }
 
-        [FunctionName("CacheWeather")]
-        [return: Table("weather")]
-        public static async Task<WeatherForecast> Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
+        [Function("CacheWeather")]
+        [TableOutput("weather")]
+        public async Task<WeatherForecast> Run([TimerTrigger("* 0 */6 * * *")] TimerInfo myTimer)
         {
             var lat = Environment.GetEnvironmentVariable("weatherlat");
             var lng = Environment.GetEnvironmentVariable("weatherlng");
 
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            var forecast = await OpenWeather.GetForecastAsync(lat, lng);
+            var forecast = await _weatherService.GetForecastAsync(lat, lng);
 
-            log.LogInformation(forecast);
+            _logger.LogInformation(forecast);
 
             return new WeatherForecast 
             { 

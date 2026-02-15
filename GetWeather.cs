@@ -1,34 +1,46 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace uk.me.timallen.infohub
 {
-    public static class GetWeather
+    public class GetWeather
     {
-        [FunctionName("GetWeather")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        private readonly IAccuWeatherService _weatherService;
+        private readonly ILogger _logger;
+
+        public GetWeather(IAccuWeatherService weatherService, ILoggerFactory loggerFactory)
+        {
+            _weatherService = weatherService;
+            _logger = loggerFactory.CreateLogger<GetWeather>();
+        }
+
+        [Function("GetWeather")]
+        public async Task<HttpResponseData> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequestData req)
         {
             string location = req.Query["location"];
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            location = location ?? data?.location;
 
-            log.LogInformation("location: " + location);
+            if (string.IsNullOrEmpty(location))
+            {
+                location = data?.location;
+            }
 
-            var response = await AccuWeather.GetForecastAsync(location, log);
+            _logger.LogInformation("location: " + location);
 
-            log.LogInformation(response);
+            var response = await _weatherService.GetForecastAsync(location);
+            _logger.LogInformation(response);
 
-            return new OkObjectResult(response);
+            var httpResponse = req.CreateResponse(HttpStatusCode.OK);
+            httpResponse.Headers.Add("Content-Type", "application/json; charset=utf-8");
+            httpResponse.WriteString(response);
+            return httpResponse;
         }
     }
 }
