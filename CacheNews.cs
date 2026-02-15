@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 
@@ -8,14 +9,14 @@ namespace uk.me.timallen.infohub
     {
         [FunctionName("CacheNews")]
         [return: Table("news")]
-        public static NewsArticles Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
+        public static async Task<NewsArticles> Run([TimerTrigger("* 0 */6 * * *")]TimerInfo myTimer, ILogger log)
         //public static NewsArticles Run([TimerTrigger("* * * * * *")]TimerInfo myTimer, ILogger log)
         {
             var result = new NewsArticles
             {
                 PartitionKey = "bbc-news",
                 RowKey = Guid.NewGuid().ToString(),
-                Articles = News.GetNews()
+                Articles = await News.GetNewsAsync()
             };
             return result;
         }
