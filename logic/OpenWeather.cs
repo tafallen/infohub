@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -6,19 +8,19 @@ namespace uk.me.timallen.infohub
 {
     public static class OpenWeather
     {
-        public static string GetForecast(string lat, string lng)
+        public static async Task<string> GetForecastAsync(string lat, string lng)
         {
-            var response = MakeRequest(lat,lng);
+            var response = await MakeRequestAsync(lat,lng);
             dynamic weather = JsonConvert.DeserializeObject(response.Content);
             var dailyForecasts = weather["daily"];
             return FormatResponse(dailyForecasts);
         }
 
-        private static IRestResponse MakeRequest(string lat, string lng)
+        private static async Task<IRestResponse> MakeRequestAsync(string lat, string lng)
         {
             var client = GetRestClient(lat, lng);
             var request = new RestRequest(Method.GET);
-            return client.Execute(request);
+            return await client.ExecuteAsync(request, CancellationToken.None);
         }        
 
         private static RestClient GetRestClient(string lat, string lng)
