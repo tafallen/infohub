@@ -14,7 +14,7 @@ namespace uk.me.timallen.infohub
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
-            var response = News.GetNews();
+            var response = await News.GetNewsAsync();
 
             log.LogInformation(response);
 

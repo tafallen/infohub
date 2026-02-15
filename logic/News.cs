@@ -3,15 +3,16 @@ using NewsAPI;
 using NewsAPI.Models;
 using NewsAPI.Constants;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace uk.me.timallen.infohub
 {
     public static class News
     {
 
-        public static string GetNews()
+        public static async Task<string> GetNewsAsync()
         {
-            var articles = GetArticles();
+            var articles = await GetArticlesAsync();
             string result = FormatResponse(articles);
             return result;
         }
@@ -40,13 +41,13 @@ namespace uk.me.timallen.infohub
             return result;
         }
 
-        private static IList<Article> GetArticles()
+        private static async Task<IList<Article>> GetArticlesAsync()
         {
             var newsKey = Environment.GetEnvironmentVariable("news_key");
             var newsApiClient = new NewsApiClient(newsKey);
             var sources = new List<string>(new []{"bbc-news"});
 
-            var articlesResponse = newsApiClient.GetTopHeadlines( new TopHeadlinesRequest
+            var articlesResponse = await newsApiClient.GetTopHeadlinesAsync(new TopHeadlinesRequest
             {
                 Sources = sources,
                 Language = Languages.EN,
