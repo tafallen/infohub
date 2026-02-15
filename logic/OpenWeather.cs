@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -35,27 +36,42 @@ namespace uk.me.timallen.infohub
 
         private static string FormatResponse(dynamic dailyForecasts)
         {
-            string result = string.Empty;
-
-            for( int i = 0; i < dailyForecasts.Count; i++)
+            var sb = new StringBuilder();
+            sb.Append("[");
+            int count = dailyForecasts.Count;
+            for( int i = 0; i < count; i++)
             {
                 dynamic day = dailyForecasts[i];
 
-                var  forecast =  "{ \"day\": \"" + DateTime.Now.AddDays(i).DayOfWeek.ToString() + 
-                    "\", \"min\": \"" + day.temp.min + 
-                    "\", \"max\": \"" + day.temp.max + 
-                    "\", \"summary\":\"" + day.weather[0].main + 
-                    "\", \"dayIcon\": \"" + day.weather[0].icon + 
-                    "\", \"nightIcon\": \"" + day.weather[0].icon + 
-                    "\", \"wind_speed\": \"" + day.wind_speed + 
-                    "\", \"wind_deg\": \"" + day.wind_deg + 
-                    "\", \"sunrise\": \"" + day.sunrise + 
-                    "\", \"sunset\": \"" + day.sunset + 
-                    "\"},";
-                result += forecast;
+                sb.Append("{ \"day\": \"");
+                sb.Append(DateTime.Now.AddDays(i).DayOfWeek.ToString());
+                sb.Append("\", \"min\": \"");
+                sb.Append(day.temp.min);
+                sb.Append("\", \"max\": \"");
+                sb.Append(day.temp.max);
+                sb.Append("\", \"summary\":\"");
+                sb.Append(day.weather[0].main);
+                sb.Append("\", \"dayIcon\": \"");
+                sb.Append(day.weather[0].icon);
+                sb.Append("\", \"nightIcon\": \"");
+                sb.Append(day.weather[0].icon);
+                sb.Append("\", \"wind_speed\": \"");
+                sb.Append(day.wind_speed);
+                sb.Append("\", \"wind_deg\": \"");
+                sb.Append(day.wind_deg);
+                sb.Append("\", \"sunrise\": \"");
+                sb.Append(day.sunrise);
+                sb.Append("\", \"sunset\": \"");
+                sb.Append(day.sunset);
+                sb.Append("\"}");
+
+                if (i < count - 1)
+                {
+                    sb.Append(",");
+                }
             }
-            result = result.Substring(0, result.Length-1);
-            return $"[{result}]";
+            sb.Append("]");
+            return sb.ToString();
         }
     }
 }
