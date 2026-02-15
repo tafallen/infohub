@@ -1,23 +1,34 @@
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace uk.me.timallen.infohub
 {
-    public static class GetHeating
+    public class GetHeating
     {
-        [FunctionName("GetHeating")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        private readonly IHiveHeatingService _heatingService;
+        private readonly ILogger _logger;
+
+        public GetHeating(IHiveHeatingService heatingService, ILoggerFactory loggerFactory)
         {
-            var state = await HiveHeating.GetHeatingStateAsync();
+            _heatingService = heatingService;
+            _logger = loggerFactory.CreateLogger<GetHeating>();
+        }
+
+        [Function("GetHeating")]
+        public async Task<HttpResponseData> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequestData req)
+        {
+            var state = await _heatingService.GetHeatingStateAsync();
             var result = state.ToString();
-            log.LogInformation(result);
-            return new OkObjectResult(result);
+            _logger.LogInformation(result);
+
+            var httpResponse = req.CreateResponse(HttpStatusCode.OK);
+            httpResponse.Headers.Add("Content-Type", "application/json; charset=utf-8");
+            httpResponse.WriteString(result);
+            return httpResponse;
         }
     }
 }

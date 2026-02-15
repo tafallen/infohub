@@ -1,35 +1,45 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace uk.me.timallen.infohub
 {
-    public static class GetSunTimes
+    public class GetSunTimes
     {
-        [FunctionName("GetSunTimes")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        private readonly ISunriseSunsetService _sunService;
+        private readonly ILogger _logger;
+
+        public GetSunTimes(ISunriseSunsetService sunService, ILoggerFactory loggerFactory)
+        {
+            _sunService = sunService;
+            _logger = loggerFactory.CreateLogger<GetSunTimes>();
+        }
+
+        [Function("GetSunTimes")]
+        public async Task<HttpResponseData> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequestData req)
         {
             string lat = req.Query["lat"];
             string lng = req.Query["lng"];
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            lat = lat ?? data?.lat;
-            lng = lng ?? data?.lng;
 
-            var result = await SunriseSunset.GetSunriseSunsetTimesAsync(lat, lng);
+            if (string.IsNullOrEmpty(lat)) lat = data?.lat;
+            if (string.IsNullOrEmpty(lng)) lng = data?.lng;
 
-            log.LogInformation(result);
+            _logger.LogInformation("lat: " + lat + " lng:" + lng);
 
-            return new OkObjectResult(result);
+            var result = await _sunService.GetSunriseSunsetTimesAsync(lat, lng);
+
+            var httpResponse = req.CreateResponse(HttpStatusCode.OK);
+            httpResponse.Headers.Add("Content-Type", "application/json; charset=utf-8");
+            httpResponse.WriteString(result);
+            return httpResponse;
         }
     }
 }

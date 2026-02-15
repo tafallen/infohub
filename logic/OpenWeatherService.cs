@@ -7,34 +7,39 @@ using RestSharp;
 
 namespace uk.me.timallen.infohub
 {
-    public static class OpenWeather
+    public class OpenWeatherService : IOpenWeatherService
     {
-        public static async Task<string> GetForecastAsync(string lat, string lng)
+        private readonly IRestClientFactory _clientFactory;
+
+        public OpenWeatherService(IRestClientFactory clientFactory)
         {
-            var response = await MakeRequestAsync(lat,lng);
+            _clientFactory = clientFactory;
+        }
+
+        public async Task<string> GetForecastAsync(string lat, string lng)
+        {
+            var response = await MakeRequestAsync(lat, lng);
             dynamic weather = JsonConvert.DeserializeObject(response.Content);
             var dailyForecasts = weather["daily"];
             return FormatResponse(dailyForecasts);
         }
 
-        private static async Task<IRestResponse> MakeRequestAsync(string lat, string lng)
+        private async Task<IRestResponse> MakeRequestAsync(string lat, string lng)
         {
             var client = GetRestClient(lat, lng);
             var request = new RestRequest(Method.GET);
             return await client.ExecuteAsync(request, CancellationToken.None);
         }        
 
-        private static RestClient GetRestClient(string lat, string lng)
+        private IRestClient GetRestClient(string lat, string lng)
         {
             var serviceApi = Environment.GetEnvironmentVariable("openweatherapiurl");
             var serviceKey = Environment.GetEnvironmentVariable("openweatherapikey");
-            return new RestClient(serviceApi + "?lat=" + lat + "&lon=" + lng + "&exclude=hourly&units=metric&appid=" + serviceKey)
-            {
-                Timeout = -1
-            };
+            string url = serviceApi + "?lat=" + lat + "&lon=" + lng + "&exclude=hourly&units=metric&appid=" + serviceKey;
+            return _clientFactory.Create(url);
         }
 
-        private static string FormatResponse(dynamic dailyForecasts)
+        private string FormatResponse(dynamic dailyForecasts)
         {
             var sb = new StringBuilder();
             sb.Append("[");
