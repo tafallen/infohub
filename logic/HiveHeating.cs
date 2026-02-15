@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -6,13 +7,13 @@ namespace uk.me.timallen.infohub
 {
     public class HiveHeating
     {
-        public static ThermostatState GetHeatingState()
+        public static async Task<ThermostatState> GetHeatingStateAsync()
         {
             var instance = new HiveHeating();
-            return instance.GetThermostatState();
+            return await instance.GetThermostatStateAsync();
         }
 
-        public ThermostatState GetThermostatState()
+        public async Task<ThermostatState> GetThermostatStateAsync()
         {
             var client = new RestClient(GetHiveNodeThermostatUrl())
             {
@@ -20,14 +21,15 @@ namespace uk.me.timallen.infohub
             };
 
             var request = GetRequest(Method.GET);
-            request.AddHeader("X-Omnia-Access-Token", GetSessionId());
+            var sessionId = await GetSessionIdAsync();
+            request.AddHeader("X-Omnia-Access-Token", sessionId);
 
-            IRestResponse response = client.Execute(request);
+            IRestResponse response = await client.ExecuteAsync(request);
             dynamic heating = JsonConvert.DeserializeObject(response.Content);
             return MapToThermostatState(heating["nodes"][0]);
         }
 
-        private string GetSessionId()
+        private async Task<string> GetSessionIdAsync()
         {
             var client = new RestClient(GetHiveAuthUrl())
             {
@@ -42,7 +44,7 @@ namespace uk.me.timallen.infohub
                                     GetPassword() + 
                                     "\",\r\n\"caller\": \"WEB\"\r\n}]\r\n}",  
                                     ParameterType.RequestBody);
-            IRestResponse response = client.Execute(request);
+            IRestResponse response = await client.ExecuteAsync(request);
             dynamic credentials = JsonConvert.DeserializeObject(response.Content);
             return credentials["sessions"][0]["sessionId"];
         }
@@ -85,7 +87,8 @@ namespace uk.me.timallen.infohub
 
         private string GetHiveBaseUrl()
         {
-            return "https://api.prod.bgchprod.info:443/omnia";
+            var url = Environment.GetEnvironmentVariable("hive_base_url");
+            return string.IsNullOrEmpty(url) ? "https://api.prod.bgchprod.info:443/omnia" : url;
         }
 
         private string GetHiveAuthUrl()

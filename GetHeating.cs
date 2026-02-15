@@ -14,7 +14,7 @@ namespace uk.me.timallen.infohub
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
-            var state = HiveHeating.GetHeatingState();
+            var state = await HiveHeating.GetHeatingStateAsync();
             var result = state.ToString();
             log.LogInformation(result);
             return new OkObjectResult(result);
