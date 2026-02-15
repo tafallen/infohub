@@ -4,6 +4,7 @@ using NewsAPI.Models;
 using NewsAPI.Constants;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace uk.me.timallen.infohub
 {
@@ -19,26 +20,37 @@ namespace uk.me.timallen.infohub
 
         private static string FormatResponse(IList<Article> articles)
         {
-            string result = "[";
+            var sb = new StringBuilder();
+            sb.Append("[");
 
             foreach (var article in articles)
             {
-                result += FormatArticle(article);
+                FormatArticle(sb, article);
             }
 
-            result = result.Substring(0, result.Length-1);
-            result += "]";
-            return result;
+            if (sb.Length > 1)
+            {
+                sb.Length--; // Remove trailing comma
+            }
+            else
+            {
+                // Edge case: empty list
+                // If the list is empty, sb is "[".
+                // We want to return "]" to match original behavior which returned "]" for empty list.
+                // Original: result="[", substring(0,0) -> "", + "]" -> "]"
+                sb.Clear();
+            }
+
+            sb.Append("]");
+            return sb.ToString();
         }
 
-        private static string FormatArticle(Article article)
+        private static void FormatArticle(StringBuilder sb, Article article)
         {
-            var result = string.Empty;
-            result += $"{{\"title\":\"{article.Title}\",";
-            result += $"\"author\":\"{article.Author}\",";
-            result += $"\"description\":\"{article.Description.Replace('\"', '\'')}\",";
-            result += $"\"publicationDate\":\"{article.PublishedAt}\"}},";
-            return result;
+            sb.Append($"{{\"title\":\"{article.Title}\",");
+            sb.Append($"\"author\":\"{article.Author}\",");
+            sb.Append($"\"description\":\"{article.Description.Replace('\"', '\'')}\",");
+            sb.Append($"\"publicationDate\":\"{article.PublishedAt}\"}},");
         }
 
         private static async Task<IList<Article>> GetArticlesAsync()
