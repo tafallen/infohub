@@ -5,12 +5,17 @@ using NewsAPI.Constants;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text;
+using System.Threading;
 
 namespace uk.me.timallen.infohub
 {
     public class NewsService : INewsService
     {
         private readonly INewsClientWrapper _client;
+        private IList<Article>? _cachedArticles;
+        private DateTime _lastFetchTime;
+        private readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
+        private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(15);
 
         public NewsService(INewsClientWrapper client)
         {
@@ -26,20 +31,40 @@ namespace uk.me.timallen.infohub
 
         private async Task<IList<Article>> GetArticlesAsync()
         {
-            var sources = new List<string>(new []{"bbc-news"});
-
-            var articlesResponse = await _client.GetTopHeadlinesAsync(new TopHeadlinesRequest
+            if (_cachedArticles != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
             {
-                Sources = sources,
-                Language = Languages.EN,
-                PageSize = 10
-            });
-
-            if (articlesResponse.Status == Statuses.Ok)
-            {
-                return articlesResponse.Articles;
+                return _cachedArticles;
             }
-            return new List<Article>();
+
+            await _cacheLock.WaitAsync();
+            try
+            {
+                if (_cachedArticles != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
+                {
+                    return _cachedArticles;
+                }
+
+                var sources = new List<string>(new[] { "bbc-news" });
+
+                var articlesResponse = await _client.GetTopHeadlinesAsync(new TopHeadlinesRequest
+                {
+                    Sources = sources,
+                    Language = Languages.EN,
+                    PageSize = 10
+                });
+
+                if (articlesResponse.Status == Statuses.Ok)
+                {
+                    _cachedArticles = articlesResponse.Articles;
+                    _lastFetchTime = DateTime.UtcNow;
+                    return _cachedArticles;
+                }
+                return new List<Article>();
+            }
+            finally
+            {
+                _cacheLock.Release();
+            }
         }
 
         private string FormatResponse(IList<Article> articles)
