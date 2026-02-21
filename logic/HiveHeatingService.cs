@@ -8,6 +8,9 @@ namespace uk.me.timallen.infohub
     public class HiveHeatingService : IHiveHeatingService
     {
         private readonly IRestClientFactory _clientFactory;
+        private string _cachedSessionId;
+        private DateTime _sessionExpiry;
+        private readonly System.Threading.SemaphoreSlim _semaphore = new System.Threading.SemaphoreSlim(1, 1);
 
         public HiveHeatingService(IRestClientFactory clientFactory)
         {
@@ -28,19 +31,34 @@ namespace uk.me.timallen.infohub
 
         private async Task<string> GetSessionIdAsync()
         {
-            var client = _clientFactory.Create(GetHiveAuthUrl());
+            await _semaphore.WaitAsync();
+            try
+            {
+                if (!string.IsNullOrEmpty(_cachedSessionId) && DateTime.UtcNow < _sessionExpiry)
+                {
+                    return _cachedSessionId;
+                }
 
-            var request = GetRequest(Method.POST);
-            request.AddParameter("application/vnd.alertme.zoo-6.1+json", 
-                                    "{\r\n\"sessions\": [{\r\n\"username\": \"" + 
-                                    GetUsername() + 
-                                    "\",\r\n\"password\": \"" + 
-                                    GetPassword() + 
-                                    "\",\r\n\"caller\": \"WEB\"\r\n}]\r\n}",  
-                                    ParameterType.RequestBody);
-            IRestResponse response = await client.ExecuteAsync(request);
-            dynamic credentials = JsonConvert.DeserializeObject(response.Content);
-            return credentials["sessions"][0]["sessionId"];
+                var client = _clientFactory.Create(GetHiveAuthUrl());
+
+                var request = GetRequest(Method.POST);
+                request.AddParameter("application/vnd.alertme.zoo-6.1+json",
+                                        "{\r\n\"sessions\": [{\r\n\"username\": \"" +
+                                        GetUsername() +
+                                        "\",\r\n\"password\": \"" +
+                                        GetPassword() +
+                                        "\",\r\n\"caller\": \"WEB\"\r\n}]\r\n}",
+                                        ParameterType.RequestBody);
+                IRestResponse response = await client.ExecuteAsync(request);
+                dynamic credentials = JsonConvert.DeserializeObject(response.Content);
+                _cachedSessionId = credentials["sessions"][0]["sessionId"];
+                _sessionExpiry = DateTime.UtcNow.AddMinutes(20);
+                return _cachedSessionId;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         private ThermostatState MapToThermostatState(dynamic thermo)
