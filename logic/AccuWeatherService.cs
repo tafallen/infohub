@@ -50,12 +50,13 @@ namespace uk.me.timallen.infohub
         private string FormatResponse(dynamic dailyForecasts)
         {
             var forecasts = new List<object>();
+            var now = DateTime.Now;
 
             for(int i = 0; i < dailyForecasts.Count; i++)
             {
                 dynamic day = dailyForecasts[i];
                 forecasts.Add(new {
-                    day = DateTime.Now.AddDays(i).DayOfWeek.ToString(),
+                    day = now.AddDays(i).DayOfWeek.ToString(),
                     min = day.Temperature.Minimum.Value.ToString(),
                     max = day.Temperature.Maximum.Value.ToString(),
                     summary = day.Day.IconPhrase.ToString(),
