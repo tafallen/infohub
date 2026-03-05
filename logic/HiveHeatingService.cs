@@ -11,10 +11,22 @@ namespace uk.me.timallen.infohub
         private string _cachedSessionId;
         private DateTime _sessionExpiry;
         private readonly System.Threading.SemaphoreSlim _semaphore = new System.Threading.SemaphoreSlim(1, 1);
+        private readonly string _username;
+        private readonly string _password;
+        private readonly string _hiveAuthUrl;
+        private readonly string _hiveNodeThermostatUrl;
 
         public HiveHeatingService(IRestClientFactory clientFactory)
         {
             _clientFactory = clientFactory;
+            _username = Environment.GetEnvironmentVariable("hive_username");
+            _password = Environment.GetEnvironmentVariable("hive_password");
+
+            var baseUrl = Environment.GetEnvironmentVariable("hive_base_url");
+            baseUrl = string.IsNullOrEmpty(baseUrl) ? "https://api.prod.bgchprod.info:443/omnia" : baseUrl;
+
+            _hiveAuthUrl = baseUrl + "/auth/sessions";
+            _hiveNodeThermostatUrl = baseUrl + "/nodes/" + Environment.GetEnvironmentVariable("hive_thermo_node");
         }
 
         public async Task<ThermostatState> GetHeatingStateAsync()
@@ -89,34 +101,22 @@ namespace uk.me.timallen.infohub
         #region Get settings from application settings
         private string GetUsername()
         {
-            return Environment.GetEnvironmentVariable("hive_username");
+            return _username;
         }
 
         private string GetPassword()
         {
-            return Environment.GetEnvironmentVariable("hive_password");
-        }
-
-        private string GetHiveBaseUrl()
-        {
-            var url = Environment.GetEnvironmentVariable("hive_base_url");
-            return string.IsNullOrEmpty(url) ? "https://api.prod.bgchprod.info:443/omnia" : url;
+            return _password;
         }
 
         private string GetHiveAuthUrl()
         {
-            return GetHiveBaseUrl() + "/auth/sessions";
-        }
-
-        private string GetHiveNodeUrl()
-        {
-            return GetHiveBaseUrl() + "/nodes";
+            return _hiveAuthUrl;
         }
 
         private string GetHiveNodeThermostatUrl()
         {
-            return GetHiveNodeUrl() + "/" + 
-            Environment.GetEnvironmentVariable("hive_thermo_node");
+            return _hiveNodeThermostatUrl;
         }
         #endregion
     }
