@@ -86,9 +86,45 @@ Just call the service endpoint and look at the JSON returned.
 
 ### GetHeating
 
+Gets the current status of your Hive heating.
+
+#### Configuration
+
+To use this you'll need to set environment variables for your Hive credentials and the thermostat node ID.
+
+##### Local config
+
+In your local.settings.json file add these in the values section:
+```"hive_username" : "<<YOUR HIVE USERNAME>>"```
+```"hive_password" : "<<YOUR HIVE PASSWORD>>"```
+```"hive_thermo_node" : "<<YOUR THERMOSTAT NODE ID>>"```
+```"hive_base_url" : "https://api.prod.bgchprod.info:443/omnia"``` (Optional)
+
+##### Server side setup
+
+In the Application Settings area of the Azure Functions where you're deploying this you'll need to add new settings with the following names:
+- _hive_username_
+- _hive_password_
+- _hive_thermo_node_
+- _hive_base_url_ (Optional)
+
 #### Usage
 
-[TODO: Add example]
+Just call the service endpoint and look at the JSON returned.
+```https://<<your service URI>>/api/GetHeating```
+
+Returned is a JSON object containing the current state of the thermostat.
+```json
+{
+  "heat": "OFF",
+  "mode": "HEAT",
+  "target": "20",
+  "temperature": "18.5",
+  "name": "MyThermostat",
+  "id": "123",
+  "href": "http://test"
+}
+```
 
 #### To Do
 
