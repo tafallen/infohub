@@ -51,8 +51,9 @@ namespace uk.me.timallen.infohub
         {
             var forecasts = new List<object>();
             var now = DateTime.Now;
+            int count = dailyForecasts.Count;
 
-            for(int i = 0; i < dailyForecasts.Count; i++)
+            for(int i = 0; i < count; i++)
             {
                 dynamic day = dailyForecasts[i];
                 forecasts.Add(new {
