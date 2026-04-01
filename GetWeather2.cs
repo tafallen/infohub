@@ -26,11 +26,13 @@ namespace uk.me.timallen.infohub
             string lat = req.Query["lat"];
             string lng = req.Query["lng"];
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-
-            if (string.IsNullOrEmpty(lat)) lat = data?.lat;
-            if (string.IsNullOrEmpty(lng)) lng = data?.lng;
+            if (string.IsNullOrEmpty(lat) || string.IsNullOrEmpty(lng))
+            {
+                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                dynamic data = JsonConvert.DeserializeObject(requestBody);
+                if (string.IsNullOrEmpty(lat)) lat = data?.lat;
+                if (string.IsNullOrEmpty(lng)) lng = data?.lng;
+            }
 
             _logger.LogInformation("lat: " + lat + " lng:" + lng);
 

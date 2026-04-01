@@ -24,11 +24,11 @@ namespace uk.me.timallen.infohub
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequestData req)
         {
             string location = req.Query["location"];
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
 
             if (string.IsNullOrEmpty(location))
             {
+                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                dynamic data = JsonConvert.DeserializeObject(requestBody);
                 location = data?.location;
             }
 
